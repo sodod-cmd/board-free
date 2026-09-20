@@ -37,7 +37,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
             i === index ? (
               <iframe
                 className="h-full w-full"
-                src={`https://www.youtube.com/embed/${slide.src}?autoplay=1&mute=1&controls=0&rel=0&loop=1&playlist=${slide.src}`}
+                src={`https://www.youtube.com/embed/${slide.src}?autoplay=1&controls=0&rel=0&loop=1&playlist=${slide.src}`}
                 title={slide.title ?? 'YouTube video'}
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowFullScreen
