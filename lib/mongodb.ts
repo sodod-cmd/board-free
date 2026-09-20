@@ -4,9 +4,11 @@ import { MongoClient, type Db } from 'mongodb'
 const uri = process.env.MONGODB_URI
 const dbName = process.env.MONGODB_DB_NAME || 'board'
 
-if (!uri) {
-  throw new Error('MONGODB_URI орчны хувьсагч тодорхойлогдоогүй байна (.env файлаа шалгана уу).')
-}
+// Анхааруулга: MONGODB_URI байхгүй үед энд шууд throw хийвэл Vercel дээрх build
+// модуль ачаалах үе шатандаа унана. Тиймээс алдааг холбогдох мөчид нь (getDb) гаргана.
+const MISSING_URI =
+  'MONGODB_URI орчны хувьсагч тодорхойлогдоогүй байна. ' +
+  'Local дээр .env файлаа, Vercel дээр Project Settings → Environment Variables хэсгээ шалгана уу.'
 
 const FALLBACK_DNS = ['1.1.1.1', '8.8.8.8']
 
@@ -57,7 +59,7 @@ function ensureUsableDnsServers() {
   }
 
   // Зөвхөн SRV холболтод л хэрэгтэй.
-  if (!uri!.startsWith('mongodb+srv://')) return
+  if (!uri?.startsWith('mongodb+srv://')) return
 
   try {
     // Драйверын ашигладаг promises resolver нь гол нь, гэхдээ хоёуланг нь шалгана.
@@ -82,7 +84,9 @@ const globalForMongo = globalThis as unknown as {
 }
 
 function connect(): Promise<MongoClient> {
-  const promise = new MongoClient(uri!, { serverSelectionTimeoutMS: 10_000 }).connect()
+  if (!uri) return Promise.reject(new Error(MISSING_URI))
+
+  const promise = new MongoClient(uri, { serverSelectionTimeoutMS: 10_000 }).connect()
   // Амжилтгүй холболтыг кэшлэвэл сервер дахин асаах хүртэл дахиж оролдохгүй болно.
   promise.catch(() => {
     if (globalForMongo._mongoClientPromise === promise) {
