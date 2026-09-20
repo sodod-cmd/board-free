@@ -5,7 +5,7 @@ import { BookOpen, Check } from 'lucide-react'
 import { isDismissed, type ClassStatus } from '@/lib/data'
 
 const PER_PAGE = 10
-const PAGE_INTERVAL = 8000
+const PAGE_INTERVAL = 5000
 
 export function ClassStatusBoard({ classes }: { classes: ClassStatus[] }) {
   const [page, setPage] = useState(0)
