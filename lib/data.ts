@@ -29,12 +29,41 @@ export type TickerItem = {
   text: string
 }
 
+/* ---------------- Долоо хоногийн тарах цагийн хуваарь ---------------- */
+
+/** Хичээлтэй 5 өдөр. jsDay нь Date.getDay()-ийн утга. */
+export const WEEKDAYS = [
+  { key: 'mon', label: 'Даваа', short: 'Да', jsDay: 1 },
+  { key: 'tue', label: 'Мягмар', short: 'Мя', jsDay: 2 },
+  { key: 'wed', label: 'Лхагва', short: 'Лх', jsDay: 3 },
+  { key: 'thu', label: 'Пүрэв', short: 'Пү', jsDay: 4 },
+  { key: 'fri', label: 'Баасан', short: 'Ба', jsDay: 5 },
+] as const
+
+export type WeekdayKey = (typeof WEEKDAYS)[number]['key']
+
+/** Гараг бүрийн тарах цаг "HH:mm". Хоосон бол тухайн өдөр хичээлгүй. */
+export type WeekSchedule = Record<WeekdayKey, string>
+
+export function emptySchedule(): WeekSchedule {
+  return { mon: '', tue: '', wed: '', thu: '', fri: '' }
+}
+
+/** Огнооноос хичээлийн өдрийн түлхүүрийг олно. Бямба/Ням бол null. */
+export function weekdayKeyFor(date: Date = new Date()): WeekdayKey | null {
+  return WEEKDAYS.find((d) => d.jsDay === date.getDay())?.key ?? null
+}
+
+export function weekdayLabel(key: WeekdayKey): string {
+  return WEEKDAYS.find((d) => d.key === key)?.label ?? ''
+}
+
 export type ClassStatus = {
   id: string
-  /** Ангийн нэр, ж: "1а" */
+  /** Ангийн нэр, ж: "5А" */
   name: string
-  /** Тарах цаг "HH:mm" хэлбэрээр */
-  dismissTime: string
+  /** Даваа–Баасан гарагуудын тарах цаг */
+  schedule: WeekSchedule
 }
 
 export const slides: Slide[] = [
@@ -117,28 +146,41 @@ export const tickerItems: TickerItem[] = [
   { id: 't5', text: 'Урлагийн наадам өндөр амжилттай зохион байгуулагдлаа.' },
 ]
 
-// Ангийн нэр + тарах цаг. Админ энэ хэсгийг оруулна.
+// Анги бүрийн долоо хоногийн тарах цаг. Админ энэ хэсгийг удирдана.
 export const classStatuses: ClassStatus[] = [
-  { id: 'c1', name: '1а', dismissTime: '12:30' },
-  { id: 'c2', name: '1б', dismissTime: '12:30' },
-  { id: 'c3', name: '2а', dismissTime: '13:00' },
-  { id: 'c4', name: '2б', dismissTime: '13:00' },
-  { id: 'c5', name: '3а', dismissTime: '13:30' },
-  { id: 'c6', name: '3б', dismissTime: '13:30' },
-  { id: 'c7', name: '4а', dismissTime: '14:00' },
-  { id: 'c8', name: '4б', dismissTime: '14:00' },
-  { id: 'c9', name: '5а', dismissTime: '14:30' },
-  { id: 'c10', name: '5б', dismissTime: '14:30' },
-  { id: 'c11', name: '6а', dismissTime: '15:00' },
-  { id: 'c12', name: '6б', dismissTime: '15:00' },
-  { id: 'c13', name: '7а', dismissTime: '15:12' },
-  { id: 'c14', name: '7б', dismissTime: '15:30' },
-  { id: 'c15', name: '8а', dismissTime: '16:00' },
-  { id: 'c16', name: '8б', dismissTime: '16:00' },
-  { id: 'c17', name: '9а', dismissTime: '16:30' },
-  { id: 'c18', name: '9б', dismissTime: '16:30' },
-  { id: 'c19', name: '10а', dismissTime: '17:00' },
-  { id: 'c20', name: '11а', dismissTime: '17:30' },
+  { id: 'c1', name: '1А', schedule: { mon: '14:20', tue: '14:20', wed: '13:40', thu: '13:40', fri: '13:40' } },
+  { id: 'c2', name: '1Б', schedule: { mon: '14:20', tue: '14:20', wed: '13:40', thu: '13:40', fri: '13:40' } },
+  { id: 'c3', name: '1В', schedule: { mon: '14:20', tue: '14:20', wed: '13:40', thu: '13:40', fri: '13:40' } },
+  { id: 'c4', name: '2А', schedule: { mon: '14:40', tue: '13:40', wed: '14:20', thu: '14:20', fri: '13:40' } },
+  { id: 'c5', name: '2Б', schedule: { mon: '14:40', tue: '13:40', wed: '14:20', thu: '14:20', fri: '13:40' } },
+  { id: 'c6', name: '3А', schedule: { mon: '14:40', tue: '13:50', wed: '14:30', thu: '14:30', fri: '13:50' } },
+  { id: 'c7', name: '3Б', schedule: { mon: '14:40', tue: '13:50', wed: '14:30', thu: '14:30', fri: '13:50' } },
+  { id: 'c8', name: '3В', schedule: { mon: '14:40', tue: '13:50', wed: '14:30', thu: '14:30', fri: '13:50' } },
+  { id: 'c9', name: '4А', schedule: { mon: '14:50', tue: '14:20', wed: '14:40', thu: '14:40', fri: '14:20' } },
+  { id: 'c10', name: '4Б', schedule: { mon: '14:50', tue: '14:20', wed: '14:40', thu: '14:40', fri: '14:20' } },
+  { id: 'c11', name: '4В', schedule: { mon: '14:50', tue: '14:20', wed: '14:40', thu: '14:40', fri: '14:20' } },
+  { id: 'c12', name: '4Г', schedule: { mon: '14:50', tue: '14:20', wed: '14:40', thu: '14:40', fri: '14:20' } },
+  { id: 'c13', name: '5А', schedule: { mon: '14:55', tue: '14:50', wed: '14:50', thu: '14:50', fri: '15:00' } },
+  { id: 'c14', name: '5Б', schedule: { mon: '14:55', tue: '14:50', wed: '14:50', thu: '14:50', fri: '15:00' } },
+  { id: 'c15', name: '5В', schedule: { mon: '14:55', tue: '14:50', wed: '14:50', thu: '14:50', fri: '15:00' } },
+  { id: 'c16', name: '5Г', schedule: { mon: '14:55', tue: '14:50', wed: '14:50', thu: '14:50', fri: '15:00' } },
+  { id: 'c17', name: '5Е', schedule: { mon: '14:55', tue: '14:50', wed: '14:50', thu: '14:50', fri: '15:00' } },
+  { id: 'c18', name: '6А', schedule: { mon: '14:50', tue: '14:50', wed: '14:50', thu: '14:50', fri: '12:35' } },
+  { id: 'c19', name: '6Б', schedule: { mon: '14:50', tue: '14:50', wed: '14:50', thu: '14:50', fri: '12:35' } },
+  { id: 'c20', name: '6В', schedule: { mon: '14:50', tue: '14:50', wed: '14:50', thu: '14:50', fri: '12:35' } },
+  { id: 'c21', name: '6Г', schedule: { mon: '14:50', tue: '14:50', wed: '14:50', thu: '14:50', fri: '12:35' } },
+  { id: 'c22', name: '7А', schedule: { mon: '14:50', tue: '14:50', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c23', name: '7Б', schedule: { mon: '14:50', tue: '14:50', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c24', name: '8А', schedule: { mon: '14:50', tue: '14:50', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c25', name: '8Б', schedule: { mon: '14:50', tue: '14:50', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c26', name: '9А', schedule: { mon: '14:50', tue: '14:50', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c27', name: '9Б', schedule: { mon: '14:50', tue: '14:50', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c28', name: '10А', schedule: { mon: '14:50', tue: '15:35', wed: '14:50', thu: '15:35', fri: '12:35' } },
+  { id: 'c29', name: '10Б', schedule: { mon: '14:50', tue: '15:35', wed: '14:50', thu: '15:35', fri: '12:35' } },
+  { id: 'c30', name: '11А', schedule: { mon: '15:35', tue: '16:20', wed: '14:50', thu: '15:35', fri: '13:20' } },
+  { id: 'c31', name: '11Б', schedule: { mon: '14:50', tue: '16:20', wed: '15:35', thu: '15:35', fri: '13:20' } },
+  { id: 'c32', name: '12А', schedule: { mon: '17:05', tue: '15:35', wed: '15:35', thu: '14:50', fri: '14:50' } },
+  { id: 'c33', name: '12Б', schedule: { mon: '17:05', tue: '17:05', wed: '13:20', thu: '14:50', fri: '14:50' } },
 ]
 
 /** Тарах цаг болсон эсэхийг одоогийн цагтай харьцуулж тооцно. */

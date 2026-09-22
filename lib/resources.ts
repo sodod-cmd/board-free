@@ -5,6 +5,7 @@ import {
   tickerCollection,
 } from '@/lib/models'
 import { bool, num, str, type ParseResult, type Resource } from '@/lib/crud'
+import { WEEKDAYS, emptySchedule, type WeekSchedule } from '@/lib/data'
 
 /** YouTube-ийн бүтэн холбоосоос видеоны ID-г салгана. */
 export function youtubeId(input: string): string {
@@ -102,22 +103,54 @@ export const tickerResource: Resource = {
   },
 }
 
+/**
+ * Ирсэн өгөгдлөөс Даваа–Баасны хуваарийг цуглуулна.
+ * `schedule` объект, эсвэл хуучин `dismissTime` (бүх өдөрт нэг цаг) хоёуланг хүлээж авна.
+ */
+export function parseSchedule(
+  body: Record<string, unknown>,
+): { ok: true; schedule: WeekSchedule } | { ok: false; error: string } {
+  const raw = (body.schedule ?? {}) as Record<string, unknown>
+  const legacy = 'dismissTime' in body ? normalizeTime(str(body.dismissTime)) : null
+  const schedule = emptySchedule()
+
+  for (const day of WEEKDAYS) {
+    const value = str(raw[day.key])
+    if (!value) {
+      // Хуваарь огт ирээгүй үед хуучин нэг цагийг бүх өдөрт тавина.
+      if (!('schedule' in body) && legacy) schedule[day.key] = legacy
+      continue
+    }
+    const time = normalizeTime(value)
+    if (!time)
+      return { ok: false, error: `${day.label} гарагийн цаг HH:mm хэлбэртэй байх ёстой (ж: 15:30).` }
+    schedule[day.key] = time
+  }
+
+  if (!WEEKDAYS.some((d) => schedule[d.key]))
+    return { ok: false, error: 'Дор хаяж нэг гарагийн тарах цагийг оруулна уу.' }
+
+  return { ok: true, schedule }
+}
+
 export const classesResource: Resource = {
   collection: classesCollection,
-  sort: { dismissTime: 1, name: 1 },
+  sort: { order: 1, name: 1 },
   parse(body, partial): ParseResult {
     const data: Record<string, unknown> = {}
 
     if (!partial || 'name' in body) {
       const name = str(body.name)
-      if (!name) return { ok: false, error: 'Ангийн нэр заавал шаардлагатай (ж: 12а).' }
+      if (!name) return { ok: false, error: 'Ангийн нэр заавал шаардлагатай (ж: 12А).' }
       data.name = name
     }
 
-    if (!partial || 'dismissTime' in body) {
-      const time = normalizeTime(str(body.dismissTime))
-      if (!time) return { ok: false, error: 'Тарах цаг HH:mm хэлбэртэй байх ёстой (ж: 15:30).' }
-      data.dismissTime = time
+    if (!partial || 'schedule' in body || 'dismissTime' in body) {
+      const parsed = parseSchedule(body)
+      if (!parsed.ok) return { ok: false, error: parsed.error }
+      data.schedule = parsed.schedule
+      // Хуучин талбарыг цэвэрлэж, зөвхөн schedule-ээр явна.
+      data.dismissTime = ''
     }
 
     return { ok: true, data: common(body, partial, data) }

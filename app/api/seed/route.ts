@@ -98,7 +98,7 @@ async function seed(force: boolean) {
     classesCol as any,
     classStatuses.map((c, i) => ({
       name: c.name,
-      dismissTime: c.dismissTime,
+      schedule: c.schedule,
       order: i,
       active: true,
       createdAt: now,

@@ -3,10 +3,13 @@ import {
   featuredNews as fallbackNews,
   slides as fallbackSlides,
   tickerItems as fallbackTicker,
+  WEEKDAYS,
+  emptySchedule,
   type ClassStatus,
   type FeaturedNews,
   type Slide,
   type TickerItem,
+  type WeekSchedule,
 } from '@/lib/data'
 import {
   classesCollection,
@@ -43,7 +46,7 @@ export async function getBoardData(): Promise<BoardData> {
       slidesCol.find(ACTIVE).sort({ order: 1 }).toArray(),
       newsCol.find(ACTIVE).sort({ order: 1 }).toArray(),
       tickerCol.find(ACTIVE).sort({ order: 1 }).toArray(),
-      classesCol.find(ACTIVE).sort({ dismissTime: 1, name: 1 }).toArray(),
+      classesCol.find(ACTIVE).sort({ order: 1, name: 1 }).toArray(),
     ])
 
     const slides: Slide[] = slideDocs.map((d) => ({
@@ -69,7 +72,7 @@ export async function getBoardData(): Promise<BoardData> {
     const classes: ClassStatus[] = classDocs.map((d) => ({
       id: d._id.toString(),
       name: d.name,
-      dismissTime: d.dismissTime,
+      schedule: readSchedule(d.schedule, d.dismissTime),
     }))
 
     const empty = !slides.length && !news.length && !ticker.length && !classes.length
@@ -86,6 +89,19 @@ export async function getBoardData(): Promise<BoardData> {
     console.error('Самбарын өгөгдөл уншиж чадсангүй:', err)
     return fallbackData()
   }
+}
+
+/**
+ * Баазаас уншсан хуваарийг бүрэн 5 өдрийн бүтэц болгоно.
+ * Хуваарь хараахан үүсээгүй хуучин бичлэгт нэг дор байсан `dismissTime`-ыг бүх өдөрт тавина.
+ */
+function readSchedule(schedule?: WeekSchedule, legacy?: string): WeekSchedule {
+  const out = emptySchedule()
+  for (const day of WEEKDAYS) {
+    const value = schedule?.[day.key]
+    out[day.key] = typeof value === 'string' && value ? value : (legacy ?? '')
+  }
+  return out
 }
 
 function fallbackData(): BoardData {

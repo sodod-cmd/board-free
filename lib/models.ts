@@ -1,5 +1,6 @@
 import { ObjectId, type Collection, type Document } from 'mongodb'
 import { getDb } from '@/lib/mongodb'
+import type { WeekSchedule } from '@/lib/data'
 
 /** MongoDB-д ашиглагдах 5 collection */
 export const COLLECTIONS = {
@@ -49,10 +50,12 @@ export type TickerDoc = {
 
 export type ClassDoc = {
   _id: ObjectId
-  /** Ангийн нэр, ж: "12а" */
+  /** Ангийн нэр, ж: "12А" */
   name: string
-  /** Тарах цаг "HH:mm" */
-  dismissTime: string
+  /** Даваа–Баасан гараг бүрийн тарах цаг "HH:mm". Хоосон бол тухайн өдөр хичээлгүй. */
+  schedule: WeekSchedule
+  /** Хуучин нэг цагийн талбар. Шинэ бичлэгт ашиглахгүй, зөвхөн нүүлгэлтийн нөөц. */
+  dismissTime?: string
   order: number
   active: boolean
   createdAt: Date

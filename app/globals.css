@@ -224,6 +224,15 @@
   );
 }
 
+.cell-off {
+  background-image: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--muted-foreground), white 12%) 0%,
+    var(--muted-foreground) 55%,
+    color-mix(in srgb, var(--muted-foreground), black 14%) 100%
+  );
+}
+
 .sheen {
   position: relative;
   overflow: hidden;
